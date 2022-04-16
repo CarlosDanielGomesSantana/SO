@@ -1,0 +1,47 @@
+#include <stdio.h>
+#include <string.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <wait.h>
+#include <errno.h>
+
+#define TRUE 1
+
+char *argumentos[64]; 
+char temporario[64];
+
+void type_prompt() {
+  printf("#Inserir comando: ");
+}
+
+void read_command(char *argumentos[])
+{	
+  int n = 0;
+  gets(temporario);
+  argumentos[0] = NULL;
+  
+  argumentos[n++] = strtok(temporario," ");
+  while (argumentos[n-1] != NULL) {
+    argumentos[n++] = strtok(NULL, " ");
+  }
+}
+
+void main() {
+  while (TRUE) {
+    type_prompt();
+    read_command(argumentos);
+    pid_t pid = fork();
+
+    if (pid == -1) {
+      printf("ERRO\n");
+    }
+    else if (pid != 0) {
+      wait (NULL);
+    } 
+    else {
+      if (execvp(argumentos[0], argumentos) == -1) {
+        printf("Erro: %s\n", strerror(errno));
+      }
+    }
+  }
+}
